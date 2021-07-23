@@ -5,7 +5,7 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/game.h
@@ -60,12 +60,6 @@ typedef struct cw_appearance_struct {
 
 typedef struct cw_comment_struct {
   char *text;
-  struct {
-    char *person_id, *person_role, *umpire_id, *reason;
-  } ejection;
-  struct {
-    char *inning, *position, *person_id;
-  } umpchange;
   struct cw_comment_struct *prev, *next;
 } CWComment;
 
@@ -76,9 +70,9 @@ typedef struct cw_event_struct {
   char batter_hand, pitcher_hand, *pitcher_hand_id;
   /* These are used for ladj; ladj_slot = 0 means no adjustment */
   int ladj_align, ladj_slot;
-  /* These are used for radj */
-  int auto_base;
-  char *auto_runner_id;
+  /* These are used for international tiebreaker (Chadwick extension) */
+  int itb_base;
+  char *itb_runner_id;
   CWAppearance *first_sub, *last_sub;
   CWComment *first_comment, *last_comment;
   struct cw_event_struct *prev, *next;

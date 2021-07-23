@@ -5,7 +5,7 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *                          Sean Forman, Sports Reference LLC
  *                          XML Team Solutions, Inc.
@@ -383,7 +383,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
       CWBoxPitching *pitcher = boxscore->pitchers[sub->team]->pitching;
 
       for (base = 1; base <= 3; base++) {
-	if (cw_gamestate_base_occupied(gameiter->state, base)) {
+	if (strcmp(gameiter->state->runners[base], "")) {
 	  pitcher->inr++;
 	  if (cw_gameiter_runner_fate(gameiter, base) >= 4) {
 	    pitcher->inrs++;
@@ -683,8 +683,8 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     player->batting->ab++;
     res_pitcher->pitching->ab++;
 
-    if (cw_gamestate_base_occupied(gameiter->state, 2) ||
-	cw_gamestate_base_occupied(gameiter->state, 3)) {
+    if (strcmp(gameiter->state->runners[2], "") ||
+	strcmp(gameiter->state->runners[3], "")) {
       boxscore->risp_ab[gameiter->state->batting_team] += 1;
     }
 
@@ -692,8 +692,8 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	event_data->event_type <= CW_EVENT_HOMERUN) {
       player->batting->h++;
       res_pitcher->pitching->h++;
-      if (cw_gamestate_base_occupied(gameiter->state, 2) ||
-	  cw_gamestate_base_occupied(gameiter->state, 3)) {
+      if (strcmp(gameiter->state->runners[2], "") ||
+	  strcmp(gameiter->state->runners[3], "")) {
 	boxscore->risp_h[gameiter->state->batting_team]++;
       }
 
@@ -833,23 +833,23 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   }
 
   if (gameiter->state->outs + cw_event_outs_on_play(event_data) == 3) {
-    if (cw_gamestate_base_occupied(gameiter->state, 3) && 
+    if (strcmp(gameiter->state->runners[3], "") && 
 	event_data->advance[3] < 4) {
       player->batting->lisp++;
     }
-    if (cw_gamestate_base_occupied(gameiter->state, 2) && 
+    if (strcmp(gameiter->state->runners[2], "") && 
 	event_data->advance[2] < 4) {
       player->batting->lisp++;
     }
   }
   else if (gameiter->event_data->event_type == CW_EVENT_GENERICOUT) {
-    if (cw_gamestate_base_occupied(gameiter->state, 1) &&
+    if (strcmp(gameiter->state->runners[1], "") &&
 	event_data->advance[1] > 1 && 
 	(event_data->advance[1] < 4 || 
 	 (event_data->advance[1] >= 4 && event_data->rbi_flag[1] == 0))) {
       player->batting->movedup++;
     }
-    if (cw_gamestate_base_occupied(gameiter->state, 2) &&
+    if (strcmp(gameiter->state->runners[2], "") &&
 	(event_data->advance[2] == 3 ||
 	 (event_data->advance[2] >= 4 && event_data->rbi_flag[2] == 0))) {
       player->batting->movedup++;
@@ -868,16 +868,16 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   CWBoxPitcher *pitcher;
 
   for (base = 1; base <= 3; base++) {
-    if (!cw_gamestate_base_occupied(gameiter->state, base)) {
+    if (!strcmp(gameiter->state->runners[base], "")) {
       continue;
     }
 
     player = cw_box_find_current_player(boxscore, 
-					gameiter->state->runners[base].runner);
+					gameiter->state->runners[base]);
     if (player == NULL) {
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for runner '%s' at event %d.\n",
-	      gameiter->game->game_id, gameiter->state->runners[base].runner,
+	      gameiter->game->game_id, gameiter->state->runners[base],
 	      gameiter->state->event_count);
       fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	      gameiter->event->batter, gameiter->event->event_text);
@@ -893,7 +893,7 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for responsible pitcher '%s' for base %d at event %d.\n",
 	      gameiter->game->game_id, 
-	      gameiter->state->runners[base].pitcher, base,
+	      gameiter->state->pitchers[base], base,
 	      gameiter->state->event_count);
       fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	      gameiter->event->batter, gameiter->event->event_text);
@@ -1170,7 +1170,7 @@ cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
 
   for (t = 0; t <= 1; t++) {
     boxscore->lob[t] = (gameiter->state->num_batters[t] +
-			gameiter->state->num_auto_runners[t] - 
+			gameiter->state->num_itb_runners[t] - 
 			gameiter->state->times_out[t] - 
 			gameiter->state->score[t]);
     boxscore->score[t] = gameiter->state->score[t];

@@ -5,11 +5,11 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
- * FILE: src/cwlib/chadwick.h
- * Top-level include file for Chadwick.
+ * FILE: src/cwlib/file.h
+ * Declaration of convenience routines for reading/writing scorebook files
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,17 +26,31 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef CW_CHADWICK_H
-#define CW_CHADWICK_H
+#ifndef CW_FILE_H
+#define CW_FILE_H
 
-#include "file.h"
-#include "game.h"
-#include "book.h"
-#include "roster.h"
-#include "league.h"
-#include "parse.h"
-#include "gameiter.h"
-#include "box.h"
+/*
+ * A replacement for C strtok(), using commas as the token separator,
+ * and respecting quoted fields
+ */
+char *cw_strtok(char *strToken);
 
-#endif   /* CW_CHADWICK_H */
+/*
+ * A replacement for C atoi(), which does validity checking and returns
+ * -1 as the "null" value for invalid inputs.
+ */
+int cw_atoi(char *s);
 
+/*
+ * Searches for the game 'game_id' in 'file'; sets the file pointer to
+ * the first record of the game, if present.
+ * Returns nonzero if the game is found.
+ */
+int cw_file_find_game(char *game_id, FILE *file);
+
+/*
+ * Finds the first game record in 'file'.
+ */
+int cw_file_find_first_game(FILE *file);
+
+#endif  /* CW_FILE_H */

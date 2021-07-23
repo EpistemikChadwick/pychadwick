@@ -5,7 +5,7 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/parse.c
@@ -237,18 +237,6 @@ cw_parse_nextsym(CWParserState *state)
     } while (state->sym == '#' || state->sym == '!');
   }
   return state->sym;
-}
-
-/*
- * Return the next character, without advancing the parser
- */
-static char
-cw_parse_peek(CWParserState *state)
-{
-  if (state->inputPos >= strlen(state->inputString)) {
-    return ' ';
-  }
-  return state->inputString[state->inputPos];
 }
 
 /*
@@ -1249,11 +1237,7 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event,
   int safe;
   int forcePlay = -1;
 
-  if (state->sym != '?' &&
-      (state->sym != '9' || cw_parse_peek(state) != '9')) {
-    /* In June 2020, DWS modified BEVENT so that generic outs
-     * starting with 99 now return fielded_by = 0 instead of fielded_by = 9
-     */
+  if (state->sym != '?') {
     event->fielded_by = (state->sym - '0');
   }
   event->advance[0] = 1;
@@ -1816,6 +1800,22 @@ static int cw_parse_strikeout(CWParserState *state, CWEventData *event,
   return 1;
 }
 
+static int cw_parse_strikeout_error(CWParserState *state, CWEventData *event,
+				    int flags)
+{
+  if (state->sym < '1' || state->sym > '9') {
+    return cw_parse_invalid(state);
+  }
+
+  event->errors[event->num_errors] = state->sym - '0';
+  event->error_types[event->num_errors++] = 'F';
+  event->play[0][0] = 'E';
+  event->play[0][1] = state->sym;
+  event->play[0][2] = '\0';
+  cw_parse_nextsym(state);
+  return 1;
+}
+
 static int cw_parse_walk(CWParserState *state, CWEventData *event, int flags)
 {
   event->advance[0] = 1;
@@ -2067,7 +2067,7 @@ void cw_parse_sanity_check(CWEventData *event)
       event->advance[base] = 0;
     }
 
-    if (strstr(event->play[base], "99")) {
+    if (!strcmp(event->play[base], "99")) {
       /* If fielding credits on any play are listed as unknown, then
        * no fielding credits should be awarded.
        */
@@ -2126,6 +2126,7 @@ int cw_parse_event(char *text, CWEventData *event)
     { CW_EVENT_INTENTIONALWALK, "I", cw_parse_walk },
     { CW_EVENT_INTENTIONALWALK, "IW", cw_parse_walk },
     { CW_EVENT_STRIKEOUT, "K", cw_parse_strikeout },
+    { CW_EVENT_STRIKEOUT, "KE", cw_parse_strikeout_error },  /* archaic */
     { CW_EVENT_OTHERADVANCE, "OA", cw_parse_other_advance },
     { CW_EVENT_PASSEDBALL, "PB", cw_parse_passed_ball },
     { CW_EVENT_PICKOFF, "PO", cw_parse_pickoff },

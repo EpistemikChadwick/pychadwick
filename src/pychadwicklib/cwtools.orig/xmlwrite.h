@@ -1,6 +1,11 @@
+/* This source code was modified by Ben Dilday on 2020-06-08
+ * for inclusion on the pychadwick project
+ * https://github.com/bdilday/pychadwick
+ * The original is available at https://github.com/chadwickbureau/chadwick
+*/
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwtools/xmlwrite.h

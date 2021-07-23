@@ -5,7 +5,7 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/gameiter.h
@@ -37,14 +37,12 @@ typedef struct cw_game_state {
   int event_count, inning, batting_team, outs, inning_batters, inning_score;
   int score[2], hits[2], errors[2], times_out[2];
   int next_batter[2], num_batters[2], dh_slot[2];
-  /* Number of automatic runners put on by the tiebreaker */
-  int num_auto_runners[2];
+  /* Number of additional runners put on by the international tiebreaker */
+  int num_itb_runners[2];
   int is_leadoff, is_new_pa, ph_flag;
 
-  struct {
-    char runner[50], pitcher[50], catcher[50];
-    int src_event, is_auto;
-  } runners[4];
+  char runners[4][50], pitchers[4][50], catchers[4][50];
+  int runner_src_event[4];
 
   struct {
     char *player_id, *name;
@@ -55,11 +53,10 @@ typedef struct cw_game_state {
   char *removed_for_ph, *removed_for_pr[4];
   char *walk_pitcher;      /* For application of rule 10.18(h)(1) */
   char *strikeout_batter;  /* For application of rule 10.17(b) */
-  char strikeout_batter_hand;
   int removed_position;
   char *go_ahead_rbi;
 
-  char batter_hand, pitcher_hand;
+  char batter_hand;
 } CWGameState;
 
 void cw_gamestate_initialize(CWGameState *);
@@ -90,11 +87,6 @@ int cw_gamestate_lineup_slot(CWGameState *state,
 int cw_gamestate_player_position(CWGameState *state,
 				 int team, char *player_id);
 
-
-/*
- * Returns nonzero if and only if 'base' is currently occupied.
- */
-int cw_gamestate_base_occupied(CWGameState *state, int base);
 
 /*
  * The batter who is charged with the outcome of the event
@@ -130,14 +122,6 @@ char *cw_gamestate_responsible_pitcher(CWGameState *state,
 				       CWEventData *event_data,
 				       int base);
 
-/*
- * The catcher who is charged with the scoring of the runner on base 'base'.
- * This is unofficial, but follows the same conventions as for those
- * of assigning pitcher responsibility.
- */
-char *cw_gamestate_responsible_catcher(CWGameState *state, 
-				       CWEventData *event_data,
-				       int base);
 
 /*
  * TODO:

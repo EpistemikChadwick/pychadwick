@@ -101,7 +101,7 @@ cw_game_lint_state(CWGameIterator *gameiter)
   }
 
   for (src = 1; src <= 3; src++) {
-    if (!cw_gamestate_base_occupied(gameiter->state, src) &&
+    if (!strcmp(gameiter->state->runners[src], "") &&
 	(gameiter->event_data->advance[src] != 0 ||
 	 cw_event_runner_put_out(gameiter->event_data, src))) {
       fprintf(stderr, "Play-by-play error in game %s at event %d:\n",
@@ -114,7 +114,7 @@ cw_game_lint_state(CWGameIterator *gameiter)
   }
 
   for (dest = 1; dest <= 3; dest++) {
-    if (!cw_gamestate_base_occupied(gameiter->state, dest)) {
+    if (!strcmp(gameiter->state->runners[dest], "")) {
       continue;
     }
 

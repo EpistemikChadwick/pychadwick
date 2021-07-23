@@ -1,6 +1,11 @@
+/* This source code was modified by Ben Dilday on 2020-06-08
+ * for inclusion on the pychadwick project
+ * https://github.com/bdilday/pychadwick
+ * The original is available at https://github.com/chadwickbureau/chadwick
+*/
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *                          Sean Forman, Sports Reference LLC
  *                          XML Team Solutions, Inc.
@@ -159,8 +164,7 @@ cwbox_xml_batting(CWGame *game, CWBoxscore *boxscore, int t, CWRoster *roster)
   int slot;
 
   printf("  <players team=\"%s\" lob=\"%d\" dp=\"%d\" tp=\"%d\" risp_ab=\"%d\" risp_h=\"%d\">\n", 
-	 (roster) ? roster->team_id : "",
-	 boxscore->lob[t], boxscore->dp[t], boxscore->tp[t],
+	 roster->team_id, boxscore->lob[t], boxscore->dp[t], boxscore->tp[t],
 	 boxscore->risp_ab[t], boxscore->risp_h[t]);
 
   for (slot = 0; slot <= 9; slot++) {
@@ -185,7 +189,7 @@ cwbox_xml_pitching(CWGame *game, CWBoxscore *boxscore, int t, CWRoster *roster)
   CWBoxPitcher *pitcher = cw_box_get_starting_pitcher(boxscore, t);
   int seq = 1;
 
-  printf("  <pitching team=\"%s\">\n", (roster) ? roster->team_id: "");
+  printf("  <pitching team=\"%s\">\n", roster->team_id);
 
   while (pitcher != NULL) {
     CWPlayer *bio = cw_roster_player_find(roster, pitcher->player_id);
@@ -426,12 +430,8 @@ cwbox_print_xml(CWGame *game, CWBoxscore *boxscore,
 	 "home=\"%s\" home_city=\"%s\" home_name=\"%s\" ",
 	 game->game_id, 
 	 cw_game_info_lookup(game, "date"), cw_game_info_lookup(game, "site"),
-	 (visitors) ? visitors->team_id : "",
-	 (visitors) ? visitors->city : "",
-	 (visitors) ? visitors->nickname : "",
-	 (home) ? home->team_id : "",
-	 (home) ? home->city : "",
-	 (home) ? home->nickname : "");
+	 visitors->team_id, visitors->city, visitors->nickname,
+	 home->team_id, home->city, home->nickname);
 
   printf("start_time=\"%s\" day_night=\"%s\" "
 	 "temperature=\"%s\" wind_direction=\"%s\" wind_speed=\"%s\" "

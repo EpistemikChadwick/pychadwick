@@ -1,6 +1,11 @@
+/* This source code was modified by Ben Dilday on 2020-06-08
+ * for inclusion on the pychadwick project
+ * https://github.com/bdilday/pychadwick
+ * The original is available at https://github.com/chadwickbureau/chadwick
+*/
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *                          Sean Forman, Sports Reference LLC
  *                          XML Team Solutions, Inc.
@@ -965,7 +970,7 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
     xml_node_attribute(node, "batter-advance", "out");
   }
 
-  if (cw_gamestate_base_occupied(gameiter->state, 1)) {
+  if (strcmp(gameiter->state->runners[1], "")) {
     xml_node_attribute_fmt(node, "runner-on-first-idref", "p.%s",
 			   gameiter->state->runners[1]);
     if (gameiter->event_data->advance[1] >= 1 &&
@@ -981,7 +986,7 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
       xml_node_attribute(node, "runner-on-first-advance", "out");
     }
   }
-  if (cw_gamestate_base_occupied(gameiter->state, 2)) {
+  if (strcmp(gameiter->state->runners[2], "")) {
     xml_node_attribute_fmt(node, "runner-on-second-idref", "p.%s",
 			   gameiter->state->runners[2]);
     if (gameiter->event_data->advance[2] >= 1 &&
@@ -997,9 +1002,9 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
       xml_node_attribute(node, "runner-on-second-advance", "out");
     }
   }
-  if (cw_gamestate_base_occupied(gameiter->state, 3)) {
+  if (strcmp(gameiter->state->runners[3], "")) {
     xml_node_attribute_fmt(node, "runner-on-third-idref", "p.%s",
-			   gameiter->state->runners[3].runner);
+			   gameiter->state->runners[3]);
     if (gameiter->event_data->advance[3] >= 1 &&
 	gameiter->event_data->advance[3] <= 3) {
       xml_node_attribute_int(node, "runner-on-third-advance",
@@ -1454,10 +1459,7 @@ cwbox_sports_title(XMLNode *parent, CWGame *game,
   season[4] = '\0';
 
   sprintf(buffer, "%s %s at %s %s, %c%c/%c%c/%s",
-	  (visitors) ? visitors->city : "",
-	  (visitors) ? visitors->nickname : "",
-	  (home) ? home->city : "",
-	  (home) ? home->nickname : "",
+	  visitors->city, visitors->nickname, home->city, home->nickname,
 	  cw_game_info_lookup(game, "date")[5],
 	  cw_game_info_lookup(game, "date")[6],
 	  cw_game_info_lookup(game, "date")[8],
@@ -1558,22 +1560,18 @@ cwbox_sports_content_codes(XMLNode *parent, CWGame *game,
   xml_node_attribute(node, "code-type", "priority");
   xml_node_attribute(node, "code-key", "normal");
 
-  if (visitors != NULL) {
-    node = xml_node_open(codes, "sports-content-code");
-    xml_node_attribute(node, "code-type", "team");
-    xml_node_attribute(node, "code-key", visitors->team_id);
-    xml_node_attribute_fmt(node, "code-name", "%s %s",
-  	  		   visitors->city, visitors->nickname);
-  }
+  node = xml_node_open(codes, "sports-content-code");
+  xml_node_attribute(node, "code-type", "team");
+  xml_node_attribute(node, "code-key", visitors->team_id);
+  xml_node_attribute_fmt(node, "code-name", "%s %s",
+			 visitors->city, visitors->nickname);
 
-  if (home != NULL) {
-    node = xml_node_open(codes, "sports-content-code");
-    xml_node_attribute(node, "code-type", "team");
-    xml_node_attribute(node, "code-key", home->team_id);
-    xml_node_attribute_fmt(node, "code-name", "%s %s",
-			   home->city, home->nickname);
-  }
-  
+  node = xml_node_open(codes, "sports-content-code");
+  xml_node_attribute(node, "code-type", "team");
+  xml_node_attribute(node, "code-key", home->team_id);
+  xml_node_attribute_fmt(node, "code-name", "%s %s",
+			 home->city, home->nickname);
+
   node = xml_node_open(codes, "sports-content-code");
   xml_node_attribute(node, "code-type", "action-listing");
   xml_node_attribute(node, "code-key", "complete");

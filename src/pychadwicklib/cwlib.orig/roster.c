@@ -5,7 +5,7 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/roster.c
@@ -210,7 +210,7 @@ cw_roster_player_append(CWRoster *roster, CWPlayer *player)
 CWPlayer *
 cw_roster_player_find(CWRoster *roster, char *player_id)
 {
-  CWPlayer *player = (roster) ? roster->first_player : NULL;
+  CWPlayer *player = roster->first_player;
 
   if (player_id == NULL) {
     return NULL;

@@ -5,7 +5,7 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *                          Sean Forman, Sports Reference LLC
  *                          XML Team Solutions, Inc.
@@ -231,15 +231,11 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
   }
 
   if (batterHand == 'B') {
-    if (gameiter->state->pitcher_hand != ' ') {
-      pitcherHand = gameiter->state->pitcher_hand;
-    }
-    else{
-      pitcherHand =
-	cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
-				home : visitors,
-				gameiter->state->fielders[1][1-gameiter->state->batting_team]);
-    }
+    pitcherHand =
+      cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
+			      home : visitors,
+			      gameiter->state->fielders[1][1-gameiter->state->batting_team]);
+
     if (pitcherHand == 'L') {
       batterHand = 'R';
     }
@@ -386,21 +382,21 @@ DECLARE_FIELDFUNC(cwevent_right_fielder)
 DECLARE_FIELDFUNC(cwevent_runner_first)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->state->runners[1].runner);
+		 gameiter->state->runners[1]);
 }
 
 /* Field 27 */
 DECLARE_FIELDFUNC(cwevent_runner_second)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->state->runners[2].runner);
+		 gameiter->state->runners[2]);
 }
 
 /* Field 28 */
 DECLARE_FIELDFUNC(cwevent_runner_third)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->state->runners[3].runner);
+		 gameiter->state->runners[3]);
 }
 
 /* Field 29 */
@@ -1182,9 +1178,9 @@ DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
 DECLARE_FIELDFUNC(cwevent_base_state_start)
 {
   return sprintf(buffer, "%d",
-		 ((cw_gamestate_base_occupied(gameiter->state, 3) ? 4 : 0) +
-		  (cw_gamestate_base_occupied(gameiter->state, 2) ? 2 : 0) +
-		  (cw_gamestate_base_occupied(gameiter->state, 1) ? 1 : 0)));
+		 ((strcmp(gameiter->state->runners[3], "") ? 4 : 0) +
+		  (strcmp(gameiter->state->runners[2], "") ? 2 : 0) +
+		  (strcmp(gameiter->state->runners[1], "") ? 1 : 0)));
 }
 
 /* Extended Field 14 */
@@ -1299,128 +1295,164 @@ DECLARE_FIELDFUNC(cwevent_res_pitcher_is_starter)
 /* Extended Field 21 */
 DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
 {
-  if (!cw_gamestate_base_occupied(gameiter->state, 1)) {
+  if (!strcmp(gameiter->state->runners[1], "")) {
     return sprintf(buffer, "0");
   }
   else {
     return sprintf(buffer, (ascii) ? "%d" : "%2d", 
 		   cw_gamestate_player_position(gameiter->state,
 						gameiter->state->batting_team,
-						gameiter->state->runners[1].runner));
+						gameiter->state->runners[1]));
   }
 }
 
 /* Extended Field 22 */
 DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
 {
-  if (!cw_gamestate_base_occupied(gameiter->state, 1)) {
+  if (!strcmp(gameiter->state->runners[1], "")) {
     return sprintf(buffer, "0");
   }
 
   return sprintf(buffer, "%d",
 		 cw_gamestate_lineup_slot(gameiter->state,
 					  gameiter->state->batting_team,
-					  gameiter->state->runners[1].runner));
+					  gameiter->state->runners[1]));
 }
 
 /* Extended Field 23 */
 DECLARE_FIELDFUNC(cwevent_runner1_src_event)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%3d",
-		 gameiter->state->runners[1].src_event);
+		 gameiter->state->runner_src_event[1]);
 }
 
 /* Extended Field 24 */
 DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
 {
-  if (!cw_gamestate_base_occupied(gameiter->state, 2)) {
+  if (!strcmp(gameiter->state->runners[2], "")) {
     return sprintf(buffer, "0");
   }
   else {
     return sprintf(buffer, (ascii) ? "%d" : "%2d", 
 		   cw_gamestate_player_position(gameiter->state,
 						gameiter->state->batting_team,
-						gameiter->state->runners[2].runner));
+						gameiter->state->runners[2]));
   }
 }
 
 /* Extended Field 25 */
 DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
 {
-  if (!cw_gamestate_base_occupied(gameiter->state, 2)) {
+  if (!strcmp(gameiter->state->runners[2], "")) {
     return sprintf(buffer, "0");
   }
 
   return sprintf(buffer, "%d",
 		 cw_gamestate_lineup_slot(gameiter->state,
 					  gameiter->state->batting_team,
-					  gameiter->state->runners[2].runner));
+					  gameiter->state->runners[2]));
 }
 
 /* Extended Field 26 */
 DECLARE_FIELDFUNC(cwevent_runner2_src_event)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%3d",
-		 gameiter->state->runners[2].src_event);
+		 gameiter->state->runner_src_event[2]);
 }
 
 /* Extended Field 27 */
 DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
 {
-  if (!cw_gamestate_base_occupied(gameiter->state, 3)) {
+  if (!strcmp(gameiter->state->runners[3], "")) {
     return sprintf(buffer, "0");
   }
   else {
     return sprintf(buffer, (ascii) ? "%d" : "%2d", 
 		   cw_gamestate_player_position(gameiter->state,
 						gameiter->state->batting_team,
-						gameiter->state->runners[3].runner));
+						gameiter->state->runners[3]));
   }
 }
 
 /* Extended Field 28 */
 DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
 {
-  if (!cw_gamestate_base_occupied(gameiter->state, 3)) {
+  if (!strcmp(gameiter->state->runners[3], "")) {
     return sprintf(buffer, "0");
   }
 
   return sprintf(buffer, "%d",
 		 cw_gamestate_lineup_slot(gameiter->state,
 					  gameiter->state->batting_team,
-					  gameiter->state->runners[3].runner));
+					  gameiter->state->runners[3]));
 }
 
 /* Extended Field 29 */
 DECLARE_FIELDFUNC(cwevent_runner3_src_event)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%3d",
-		 gameiter->state->runners[3].src_event);
+		 gameiter->state->runner_src_event[3]);
 }
 
+/*
+ * The "responsible catcher" (for catcher ERA) is computed using the
+ * same rules as the "responsible pitcher."  See the above note for
+ * cwevent_responsible_pitcher for how this is operationalized in cwevent.
+ */
+char *
+cwevent_responsible_catcher(CWGameState *state, CWEventData *event_data,
+			    int base)
+{
+  if (base == 3) {
+    return state->catchers[3];
+  }
+  else if (base == 2) {
+    if (cw_event_runner_put_out(event_data, 3) &&
+	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->catchers[3];
+    }
+    else {
+      return state->catchers[2];
+    }
+  }
+  else {
+    if (cw_event_runner_put_out(event_data, 3) &&
+	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->catchers[2];
+    }
+    else if (cw_event_runner_put_out(event_data, 3) &&
+	     !strcmp(state->runners[2], "") &&
+	     event_data->advance[1] >= 4) {
+      return state->catchers[3];
+    }
+    else {
+      return state->catchers[1];
+    }
+  }
+}
 
 /* Extended Field 30 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher1)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_gamestate_responsible_catcher(gameiter->state, 
-						  gameiter->event_data, 1));
+		 cwevent_responsible_catcher(gameiter->state, 
+					     gameiter->event_data, 1));
 }
 
 /* Extended Field 31 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher2)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_gamestate_responsible_catcher(gameiter->state,
-						  gameiter->event_data, 2));
+		 cwevent_responsible_catcher(gameiter->state,
+					     gameiter->event_data, 2));
 }
 
 /* Extended Field 32 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher3)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_gamestate_responsible_catcher(gameiter->state,
-						  gameiter->event_data, 3));
+		 cwevent_responsible_catcher(gameiter->state,
+					     gameiter->event_data, 3));
 }
 
 /* Extended Field 33 */
@@ -2017,7 +2049,7 @@ cwevent_print_welcome_message(char *argv0)
   fprintf(stderr, 
 	  "\nChadwick expanded event descriptor, version " VERSION); 
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2021\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(stderr, "Copyright (c) 2002-2019\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
   fprintf(stderr, "This is free software, " 
 	  "subject to the terms of the GNU GPL license.\n\n");
 }
@@ -2038,13 +2070,17 @@ cwevent_initialize(void)
   strcpy(output_line, "");
   buf = output_line;
 
-  for (i = 0; i <= max_field; i++) {
-    if (fields[i]) {
-      if (ascii && comma) {
-	*(buf++) = ',';
+  for (i = 0; i <= max_field; i++)
+  {
+    if (fields[i])
+    {
+      if (ascii && comma)
+      {
+        *(buf++) = ',';
       }
-      else {
-	comma = 1;
+      else
+      {
+        comma = 1;
       }
       buf += sprintf(buf, "\"%s\"", cwevent_field_data[i].header);
     }

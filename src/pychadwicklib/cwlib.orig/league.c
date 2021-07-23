@@ -5,7 +5,7 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/league.c
@@ -85,6 +85,38 @@ cw_league_roster_find(CWLeague *league, char *team)
   return roster;
 }
 
+void
+cw_league_init_read_file(CWLeague *league, char *filename) {
+
+  FILE *file;
+
+  league = (CWLeague *) malloc(sizeof(CWLeague));
+  league->first_roster = NULL;
+  league->last_roster = NULL;
+
+  printf("opening file %s\n", filename);
+  file = fopen(filename, "r");
+  if (!file) {
+    printf("Cannot open file %s\n", filename);
+  }
+  cw_league_read(league, file);
+}
+
+
+/* reads league from a file. the league pointer must be initialized with a call
+   to cw_league_create first. 
+*/
+int cw_league_read_file(CWLeague *league, char *filename) {
+  FILE *file; 
+  
+  printf("opening file %s\n", filename);
+  file = fopen(filename, "r");
+  if (!file) {
+    printf("Cannot open file %s\n", filename);
+  }
+  return cw_league_read(league, file);
+}
+
 int
 cw_league_read(CWLeague *rosterList, FILE *file)
 {
@@ -105,7 +137,7 @@ cw_league_read(CWLeague *rosterList, FILE *file)
       continue;
     }
 
-    cw_league_roster_append(rosterList, 
+    cw_league_roster_append(rosterList,
 			    cw_roster_create(team_id, 0, league,
 					     city, nickname));
   }

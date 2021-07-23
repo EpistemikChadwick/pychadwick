@@ -5,7 +5,7 @@
 */
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2019, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *                          Sean Forman, Sports Reference LLC
  *                          XML Team Solutions, Inc.
@@ -57,7 +57,7 @@ int fields[84] = {
 int max_field = 83;
 
 /* Extended fields to display (-x) */
-int ext_fields[97] = {
+int ext_fields[95] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -65,10 +65,10 @@ int ext_fields[97] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0
+  0, 0, 0, 0, 0, 0
 };
 
-int max_ext_field = 96;
+int max_ext_field = 94;
 
 char program_name[20] = "cwgame";
 
@@ -82,16 +82,26 @@ int print_header = 0;
 /*
  * This function converts month, date, and year to the day of the week,
  * returning an integer between 0 and 6, inclusive, with 0 indicating Sunday.
- *
- * This implementation was posted to comp.lang.c in 1992 by
- * Tomohiko Sakamoto.
- */
+ * This function should work for any year from 1901 to 2099.
+*/
 static int
-get_day_of_week(int month, int day, int year) 
+get_day_of_week(int month, int date, int year) 
 {
-  static int t[12] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
-  year -= month < 3;
-  return (year + year/4 - year/100 + year/400 + t[month-1] + day) % 7;
+  /*
+   * The base year is 1900.  Since 1 January 1900 was a Monday, we get the
+   * following keys for the months.
+   */
+  static int month_keys[12] = { 1, 4, 4, 0, 2, 5, 0, 3, 6, 1, 4, 6 };
+
+  int day;
+
+  day = (year - 1900) + (year - 1900) / 4 + month_keys[month - 1] + date - 1;
+  /* The above counts the leap day even if it occurs later in the year */
+  if ((year > 1900) && (year % 4 == 0) && (month < 2)) {
+    day--;
+  }
+  day %= 7;
+  return day;
 }
 
 /*************************************************************************
@@ -534,78 +544,57 @@ DECLARE_FIELDFUNC(cwgame_time_of_game)
 /* Field 33 */
 DECLARE_FIELDFUNC(cwgame_innings)
 {
-  int i;
-  if (gameiter->game->first_event != NULL) {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->inning);
-  }
-  else {
-    for (i = 1; i < 50; i++) {
-      if (box->linescore[i][0] < 0 && box->linescore[i][1] < 0) {
-	break;
-      }
-    }
-    return sprintf(buffer, (ascii) ? "%d" : "%2d", i-1);
-  }
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->inning);
 }
 
 /* Field 34 */
 DECLARE_FIELDFUNC(cwgame_visitor_score)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->score[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[0]);
 }
 
 /* Field 35 */
 DECLARE_FIELDFUNC(cwgame_home_score)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->score[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[1]);
 }
 
 /* Field 36 */
 DECLARE_FIELDFUNC(cwgame_visitor_hits)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->hits[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->hits[0]);
 }
 
 /* Field 37 */
 DECLARE_FIELDFUNC(cwgame_home_hits)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->hits[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->hits[1]);
 }
 
 /* Field 38 */
 DECLARE_FIELDFUNC(cwgame_visitor_errors)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->errors[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->errors[0]);
 }
 
 /* Field 39 */
 DECLARE_FIELDFUNC(cwgame_home_errors)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->errors[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->errors[1]);
 }
 
 /* Field 40 */
 DECLARE_FIELDFUNC(cwgame_visitor_lob)
 {
-  if (gameiter->game->first_event != NULL) {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d",
-		   cw_gamestate_left_on_base(gameiter->state, 0));
-  }
-  else {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d", box->lob[0]);
-  }
+  return sprintf(buffer, (ascii) ? "%d" : "%2d",
+		 cw_gamestate_left_on_base(gameiter->state, 0));
 }
 
 /* Field 41 */
 DECLARE_FIELDFUNC(cwgame_home_lob)
 {
-  if (gameiter->game->first_event != NULL) {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d",
-		   cw_gamestate_left_on_base(gameiter->state, 1));
-  }
-  else {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d", box->lob[1]);
-  }
+  return sprintf(buffer, (ascii) ? "%d" : "%2d",
+		 cw_gamestate_left_on_base(gameiter->state, 1));
 }
 
 /* Field 42 */
@@ -2004,23 +1993,6 @@ DECLARE_FIELDFUNC(cwgame_acquisition_info)
   return sprintf(buffer, "%s", "");
 }
 
-DECLARE_FIELDFUNC(cwgame_scheduled_innings)
-{
-  char *tmp;
-  return sprintf(buffer, "%s",
-		 (tmp = cw_game_info_lookup(gameiter->game, "innings")) ?
-		 tmp : "9");
-}
-
-DECLARE_FIELDFUNC(cwgame_tiebreaker)
-{
-  char *tmp;
-  return sprintf(buffer, "\"%s\"",
-		 (tmp = cw_game_info_lookup(gameiter->game, "tiebreaker")) ?
-		 tmp : "");
-}
-
-
 static field_struct ext_field_data[] = {
   { cwgame_visitors_league, "AWAY_TEAM_LEAGUE_ID", "visiting team league" },
   { cwgame_home_league, "HOME_TEAM_LEAGUE_ID", "home team league" },
@@ -2116,9 +2088,7 @@ static field_struct ext_field_data[] = {
   { cwgame_home_batter8_name, "HOME_LINEUP8_BAT_NAME_TX", "home batter 8 name" },
   { cwgame_home_batter9_name, "HOME_LINEUP9_BAT_NAME_TX", "home batter 9 name" },
   { cwgame_additional_info, "ADD_INFO_TX", "additional information" },
-  { cwgame_acquisition_info, "ACQ_INFO_TX", "acquisition information" },
-  { cwgame_scheduled_innings, "SCHED_INN_CT", "scheduled length of game in innings " },
-  { cwgame_tiebreaker, "TIEBREAK_CD", "tiebreaker rule type in use" }
+  { cwgame_acquisition_info, "ACQ_INFO_TX", "acquisition information" }
 };
 
 void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
@@ -2262,7 +2232,7 @@ cwgame_print_welcome_message(char *argv0)
   fprintf(stderr, 
 	  "\nChadwick expanded game descriptor, version " VERSION);
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2021\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(stderr, "Copyright (c) 2002-2019\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
   fprintf(stderr, "This is free software, "
 	  "subject to the terms of the GNU GPL license.\n\n");
 }
