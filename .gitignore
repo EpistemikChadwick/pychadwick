@@ -1,8 +1,9 @@
 # mhs changes
 FORK*
-github*
+clone*
 myChanges*
 src-orig/
+dev-py*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
