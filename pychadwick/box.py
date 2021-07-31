@@ -58,6 +58,7 @@ CWBoxBatting._fields_ = [
     ("strikes", c_int),
 ]
 
+
 CWBoxFielding._fields_ = [
     ("g", c_int),
     ("outs", c_int),
@@ -72,11 +73,13 @@ CWBoxFielding._fields_ = [
     ("xi", c_int),
 ]
 
+
+# fixed field name "battiing" >> "batting"
 CWBoxPlayer._fields_ = [
     ("player_id", c_char_p),
     ("name", c_char_p),
     ("date", c_char * 9),
-    ("battiing", POINTER(CWBoxBatting)),
+    ("batting", POINTER(CWBoxBatting)),
     ("ph_inn", c_int),
     ("pr_inn", c_int),
     ("num_positions", c_int),
@@ -137,6 +140,7 @@ CWBoxPitcher._fields_ = [
     ("next", POINTER(CWBoxPitcher)),
 ]
 
+
 CWBoxEvent._fields_ = [
     ("players", c_char_p * 20),
     ("inning", c_int),
@@ -151,6 +155,7 @@ CWBoxEvent._fields_ = [
 ]
 
 
+# fixed all fields from "b2_list" to "tp_list": "POINTER(CWBoxEvent" >> POINTER(CWBoxEvent)
 CWBoxscore._fields_ = [
     ("slots", (POINTER(CWBoxPlayer) * 2) * 10),
     ("pitchers", POINTER(CWBoxPitcher) * 2),
@@ -166,20 +171,20 @@ CWBoxscore._fields_ = [
     ("risp_h", c_int * 2),
     ("outs_at_end", c_int),
     ("walk_off", c_int),
-    ("b2_list", "POINTER(CWBoxEvent"),
-    ("b3_list", "POINTER(CWBoxEvent"),
-    ("hr_list", "POINTER(CWBoxEvent"),
-    ("sb_list", "POINTER(CWBoxEvent"),
-    ("cs_list", "POINTER(CWBoxEvent"),
-    ("po_list", "POINTER(CWBoxEvent"),
-    ("sh_list", "POINTER(CWBoxEvent"),
-    ("sf_list", "POINTER(CWBoxEvent"),
-    ("hp_list", "POINTER(CWBoxEvent"),
-    ("ibb_list", "POINTER(CWBoxEvent"),
-    ("wp_list", "POINTER(CWBoxEvent"),
-    ("bk_list", "POINTER(CWBoxEvent"),
-    ("err_list", "POINTER(CWBoxEvent"),
-    ("pb_list", "POINTER(CWBoxEvent"),
-    ("dp_list", "POINTER(CWBoxEvent"),
-    ("tp_list", "POINTER(CWBoxEvent"),
+    ("b2_list", POINTER(CWBoxEvent)),
+    ("b3_list", POINTER(CWBoxEvent)),
+    ("hr_list", POINTER(CWBoxEvent)),
+    ("sb_list", POINTER(CWBoxEvent)),
+    ("cs_list", POINTER(CWBoxEvent)),
+    ("po_list", POINTER(CWBoxEvent)),
+    ("sh_list", POINTER(CWBoxEvent)),
+    ("sf_list", POINTER(CWBoxEvent)),
+    ("hp_list", POINTER(CWBoxEvent)),
+    ("ibb_list", POINTER(CWBoxEvent)),
+    ("wp_list", POINTER(CWBoxEvent)),
+    ("bk_list", POINTER(CWBoxEvent)),
+    ("err_list", POINTER(CWBoxEvent)),
+    ("pb_list", POINTER(CWBoxEvent)),
+    ("dp_list", POINTER(CWBoxEvent)),
+    ("tp_list", POINTER(CWBoxEvent)),
 ]
