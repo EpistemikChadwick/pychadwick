@@ -7,7 +7,8 @@ from ctypes import (
     pointer,
     create_string_buffer,
 )
-import logging
+# CANNOT have default logging in this file as it interferes with the console mhsLogger
+# import logging
 import os
 import requests
 import tempfile
@@ -78,10 +79,8 @@ class Chadwick:
         elif field_name in self.cwevent_ext_headers:
             idx = self.cwevent_ext_headers.index(field_name)
             self.cwevent_ext_fields[idx] = value
-        else:
-            logging.warning(
-                f"field_name {field_name} is not in the headers. value NOT set"
-            )
+        # else:
+        #     logging.warning( f"field_name {field_name} is not in the headers. value NOT set" )
 
     def fopen(self, file_path, mode=b"r"):
         func = self.libchadwick.fopen
@@ -201,17 +200,17 @@ class Chadwick:
         gameiter = self.cw_gameiter_create(game_ptr)
 
         if not roster_visitor:
-            logging.debug("roster for %s is undefined.", "visitor")
+            # logging.debug("roster for %s is undefined.", "visitor")
             roster_visitor = pointer(CWRoster())
 
         if not roster_home:
-            logging.debug("roster for %s is undefined.", "home")
+            # logging.debug("roster for %s is undefined.", "home")
             roster_home = pointer(CWRoster())
 
         event_str = create_string_buffer(b" ", 4096)
         while gameiter.contents.event:
             if gameiter.contents.event.contents.event_text == b"NP":
-                logging.debug("event text == NP")
+                # logging.debug("event text == NP")
                 self.cw_gameiter_next(gameiter)
                 continue
             cwevent_process_game_record(
